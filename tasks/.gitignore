@@ -34,3 +34,16 @@ build/
 
 ### macOS ###
 .DS_Store
+**/.DS_Store
+
+### IDE Config XML Files ###
+**/.idea/
+*.iml
+
+### Maven Wrapper JAR ###
+.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+### Generated Files ###
+*.log
+*.cache
