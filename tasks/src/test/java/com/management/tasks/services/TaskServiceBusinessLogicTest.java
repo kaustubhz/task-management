@@ -6,6 +6,7 @@ import com.management.tasks.dto.response.TaskResponse;
 import com.management.tasks.entity.Task;
 import com.management.tasks.entity.TaskPriority;
 import com.management.tasks.entity.TaskStatus;
+import com.management.tasks.exceptions.TaskNotFoundException;
 import com.management.tasks.mapper.TaskMapper;
 import com.management.tasks.repository.TaskRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -187,8 +188,8 @@ class TaskServiceBusinessLogicTest {
 
             // Act & Assert
             assertThatThrownBy(() -> taskService.getTaskById("999"))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("Task not found with id: 999");
+                    .isInstanceOf(TaskNotFoundException.class)
+                    .hasMessageContaining("Task is not found 999");
 
             verify(taskRepository).findById(999L);
         }

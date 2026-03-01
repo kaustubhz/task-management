@@ -30,7 +30,19 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(TaskController.class)
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.test.context.support.WithMockUser;
+import com.management.tasks.security.CustomOAuth2UserService;
+
+import org.springframework.context.annotation.Import;
+import com.management.tasks.config.TestSecurityConfig;
+
+@WebMvcTest(controllers = TaskController.class, properties = {
+                "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration,org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration,org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration"
+})
+@org.springframework.test.context.ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
+@WithMockUser
 @DisplayName("TaskController Integration Tests")
 class TaskControllerTest {
 
@@ -39,6 +51,12 @@ class TaskControllerTest {
 
         @MockitoBean
         private TaskServiceBusinessLogic taskServiceBusinessLogic;
+
+        @MockitoBean
+        private CustomOAuth2UserService customOAuth2UserService;
+
+        @MockitoBean
+        private ClientRegistrationRepository clientRegistrationRepository;
 
         private ObjectMapper objectMapper;
         private Task sampleTask;
@@ -199,16 +217,15 @@ class TaskControllerTest {
                 }
 
                 @Test
-                @DisplayName("should throw exception when task not found (no global exception handler)")
+                @DisplayName("should return 404 when task not found")
                 void getTaskById_WhenNotExists_ShouldThrowException() throws Exception {
                         // Arrange
                         when(taskServiceBusinessLogic.getTaskById("999"))
-                                        .thenThrow(new RuntimeException("Task not found with id: 999"));
+                                        .thenThrow(new com.management.tasks.exceptions.TaskNotFoundException("999"));
 
-                        // Act & Assert - Exception propagates without global handler
-                        org.junit.jupiter.api.Assertions.assertThrows(
-                                        jakarta.servlet.ServletException.class,
-                                        () -> mockMvc.perform(get("/api/tasks/999")));
+                        // Act & Assert - GlobalExceptionHandler returns 404
+                        mockMvc.perform(get("/api/tasks/999"))
+                                        .andExpect(status().isNotFound());
                 }
         }
 

@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ public class TaskController {
 	 *
 	 * @return 201 CREATED with the created task
 	 */
+	@PreAuthorize("hasRole('USER')")
 	@PostMapping(consumes = "application/json")
 	public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest taskRequest) {
 		var createdTask = taskServiceBusinessLogic.createTask(taskRequest);
@@ -51,6 +53,7 @@ public class TaskController {
 	 *
 	 * @return 200 OK with list of tasks
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@GetMapping
 	public ResponseEntity<List<TaskResponse>> getTasks() {
 		var taskResponses = taskServiceBusinessLogic.fetchTasks();
@@ -62,6 +65,7 @@ public class TaskController {
 	 *
 	 * @return 200 OK with the task, or 404 NOT FOUND if not exists
 	 */
+	@PreAuthorize("hasRole('USER')")
 	@GetMapping("/{id}")
 	public ResponseEntity<TaskResponse> getTaskById(@PathVariable("id") String id) {
 		var taskResponse = taskServiceBusinessLogic.getTaskById(id);
@@ -73,9 +77,10 @@ public class TaskController {
 	 *
 	 * @return 200 OK with the updated task
 	 */
+	@PreAuthorize("hasRole('USER')")
 	@PutMapping(value = "/{id}", consumes = "application/json")
 	public ResponseEntity<TaskResponse> updateTask(@PathVariable("id") String id,
-												   @Valid @RequestBody TaskUpdateRequest taskUpdateRequest) {
+			@Valid @RequestBody TaskUpdateRequest taskUpdateRequest) {
 		var updatedTask = taskServiceBusinessLogic.updateTask(id, taskUpdateRequest);
 		var response = new TaskResponse(
 				updatedTask.getId(),
@@ -94,6 +99,7 @@ public class TaskController {
 	 *
 	 * @return 204 NO CONTENT on success
 	 */
+	@PreAuthorize("hasRole('USER')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteTask(@PathVariable("id") String id) {
 		taskServiceBusinessLogic.deleteTask(id);

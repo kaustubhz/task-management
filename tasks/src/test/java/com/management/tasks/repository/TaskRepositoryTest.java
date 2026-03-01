@@ -17,7 +17,14 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
+import org.springframework.context.annotation.Import;
+import com.management.tasks.config.TestSecurityConfig;
+
+@DataJpaTest(properties = {
+        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration,org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration,org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration"
+})
+@org.springframework.test.context.ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
 @DisplayName("TaskRepository Integration Tests")
 class TaskRepositoryTest {
 

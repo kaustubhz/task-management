@@ -4,6 +4,7 @@ import com.management.tasks.dto.request.TaskRequest;
 import com.management.tasks.dto.request.TaskUpdateRequest;
 import com.management.tasks.dto.response.TaskResponse;
 import com.management.tasks.entity.Task;
+import com.management.tasks.exceptions.TaskNotFoundException;
 import com.management.tasks.mapper.TaskMapper;
 import com.management.tasks.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class TaskServiceBusinessLogic {
 
 	public TaskResponse getTaskById(String id) {
 		var task = taskRepository.findById(Long.parseLong(id))
-				.orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+				.orElseThrow(() -> new TaskNotFoundException(id));
 		return new TaskResponse(
 				task.getId(),
 				task.getTitle(),
