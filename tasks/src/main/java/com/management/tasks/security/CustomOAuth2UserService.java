@@ -1,9 +1,6 @@
 package com.management.tasks.security;
 
-import com.management.tasks.entity.Role;
-import com.management.tasks.entity.RoleName;
 import com.management.tasks.entity.User;
-import com.management.tasks.repository.RoleRepository;
 import com.management.tasks.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +14,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,7 +25,6 @@ import java.util.stream.Collectors;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -80,8 +77,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private User createNewUser(String provider, String providerId, String email,
             String username, String name) {
-        Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Default role not found"));
 
         User newUser = User.builder()
                 .username(username != null ? username : email.split("@")[0])
@@ -90,7 +85,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .provider(provider)
                 .providerId(providerId)
                 .enabled(true)
-                .roles(Set.of(userRole))
+                .roles(Set.of("ROLE_USER"))
                 .build();
 
         log.info("Creating new OAuth2 user: {}", email);
@@ -98,8 +93,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(User user) {
+        if (user.getRoles() == null)
+            return Collections.emptyList();
         return user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-                .collect(Collectors.toSet());
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 }

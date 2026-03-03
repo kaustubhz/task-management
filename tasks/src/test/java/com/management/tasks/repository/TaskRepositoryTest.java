@@ -8,8 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.springframework.context.annotation.Import;
 import com.management.tasks.config.TestSecurityConfig;
 
-@DataJpaTest(properties = {
+@SpringBootTest(properties = {
         "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration,org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration,org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration"
 })
 @org.springframework.test.context.ActiveProfiles("test")
@@ -29,7 +29,7 @@ import com.management.tasks.config.TestSecurityConfig;
 class TaskRepositoryTest {
 
     @Autowired
-    private TestEntityManager entityManager;
+    private MongoTemplate mongoTemplate;
 
     @Autowired
     private TaskRepository taskRepository;
@@ -84,11 +84,9 @@ class TaskRepositoryTest {
 
             // Act
             Task savedTask = taskRepository.save(taskWithAllFields);
-            entityManager.flush();
-            entityManager.clear();
 
             // Assert
-            Task foundTask = entityManager.find(Task.class, savedTask.getId());
+            Task foundTask = mongoTemplate.findById(savedTask.getId(), Task.class);
             assertThat(foundTask).isNotNull();
             assertThat(foundTask.getTitle()).isEqualTo("Complete Task");
             assertThat(foundTask.getStatus()).isEqualTo(TaskStatus.IN_PROGRESS);
@@ -104,7 +102,7 @@ class TaskRepositoryTest {
         @DisplayName("should return task when exists")
         void findById_WhenExists_ShouldReturnTask() {
             // Arrange
-            Task persistedTask = entityManager.persistAndFlush(sampleTask);
+            Task persistedTask = mongoTemplate.save(sampleTask);
 
             // Act
             Optional<Task> result = taskRepository.findById(persistedTask.getId());
@@ -119,7 +117,7 @@ class TaskRepositoryTest {
         @DisplayName("should return empty when task not exists")
         void findById_WhenNotExists_ShouldReturnEmpty() {
             // Act
-            Optional<Task> result = taskRepository.findById(999L);
+            Optional<Task> result = taskRepository.findById("non-existent-id");
 
             // Assert
             assertThat(result).isEmpty();
@@ -148,9 +146,8 @@ class TaskRepositoryTest {
                     .priority(TaskPriority.HIGH)
                     .build();
 
-            entityManager.persist(task1);
-            entityManager.persist(task2);
-            entityManager.flush();
+            mongoTemplate.save(task1);
+            mongoTemplate.save(task2);
 
             // Act
             List<Task> result = taskRepository.findAll();
@@ -180,15 +177,14 @@ class TaskRepositoryTest {
         @DisplayName("should remove task from database")
         void deleteById_ShouldRemoveTask() {
             // Arrange
-            Task persistedTask = entityManager.persistAndFlush(sampleTask);
-            Long taskId = persistedTask.getId();
+            Task persistedTask = mongoTemplate.save(sampleTask);
+            String taskId = persistedTask.getId();
 
             // Act
             taskRepository.deleteById(taskId);
-            entityManager.flush();
 
             // Assert
-            Task foundTask = entityManager.find(Task.class, taskId);
+            Task foundTask = mongoTemplate.findById(taskId, Task.class);
             assertThat(foundTask).isNull();
         }
     }
@@ -201,17 +197,15 @@ class TaskRepositoryTest {
         @DisplayName("should update existing task")
         void save_ExistingTask_ShouldUpdate() {
             // Arrange
-            Task persistedTask = entityManager.persistAndFlush(sampleTask);
-            entityManager.clear();
+            Task persistedTask = mongoTemplate.save(sampleTask);
 
             // Act
             persistedTask.setTitle("Updated Title");
             persistedTask.setStatus(TaskStatus.COMPLETED);
             Task updatedTask = taskRepository.save(persistedTask);
-            entityManager.flush();
 
             // Assert
-            Task foundTask = entityManager.find(Task.class, persistedTask.getId());
+            Task foundTask = mongoTemplate.findById(persistedTask.getId(), Task.class);
             assertThat(foundTask.getTitle()).isEqualTo("Updated Title");
             assertThat(foundTask.getStatus()).isEqualTo(TaskStatus.COMPLETED);
         }

@@ -73,7 +73,7 @@ class TaskControllerTest {
                 now = LocalDateTime.now();
 
                 sampleTask = Task.builder()
-                                .id(1L)
+                                .id("1")
                                 .title("Test Task")
                                 .description("Test Description")
                                 .status(TaskStatus.TODO)
@@ -98,7 +98,7 @@ class TaskControllerTest {
                                 now.plusDays(14));
 
                 sampleTaskResponse = new TaskResponse(
-                                1L,
+                                "1",
                                 "Test Task",
                                 "Test Description",
                                 TaskStatus.TODO,
@@ -123,7 +123,7 @@ class TaskControllerTest {
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(sampleTaskRequest)))
                                         .andExpect(status().isCreated())
-                                        .andExpect(jsonPath("$.id").value(1))
+                                        .andExpect(jsonPath("$.id").value("1"))
                                         .andExpect(jsonPath("$.title").value("Test Task"))
                                         .andExpect(jsonPath("$.status").value("TODO"))
                                         .andExpect(jsonPath("$.priority").value("MEDIUM"));
@@ -180,7 +180,7 @@ class TaskControllerTest {
                         mockMvc.perform(get("/api/tasks"))
                                         .andExpect(status().isOk())
                                         .andExpect(jsonPath("$").isArray())
-                                        .andExpect(jsonPath("$[0].id").value(1))
+                                        .andExpect(jsonPath("$[0].id").value("1"))
                                         .andExpect(jsonPath("$[0].title").value("Test Task"));
                 }
 
@@ -211,7 +211,7 @@ class TaskControllerTest {
                         // Act & Assert
                         mockMvc.perform(get("/api/tasks/1"))
                                         .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$.id").value(1))
+                                        .andExpect(jsonPath("$.id").value("1"))
                                         .andExpect(jsonPath("$.title").value("Test Task"))
                                         .andExpect(jsonPath("$.status").value("TODO"));
                 }
@@ -238,7 +238,7 @@ class TaskControllerTest {
                 void updateTask_ShouldReturn200WithUpdatedTask() throws Exception {
                         // Arrange
                         Task updatedTask = Task.builder()
-                                        .id(1L)
+                                        .id("1")
                                         .title("Updated Task")
                                         .description("Updated Description")
                                         .status(TaskStatus.IN_PROGRESS)
@@ -256,7 +256,7 @@ class TaskControllerTest {
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(sampleTaskUpdateRequest)))
                                         .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$.id").value(1))
+                                        .andExpect(jsonPath("$.id").value("1"))
                                         .andExpect(jsonPath("$.title").value("Updated Task"))
                                         .andExpect(jsonPath("$.status").value("IN_PROGRESS"))
                                         .andExpect(jsonPath("$.priority").value("HIGH"));

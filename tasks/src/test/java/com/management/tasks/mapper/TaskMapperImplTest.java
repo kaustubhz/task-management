@@ -31,7 +31,7 @@ class TaskMapperImplTest {
     void map_WithValidTasks_ShouldReturnTaskResponses() {
         // Arrange
         Task task1 = Task.builder()
-                .id(1L)
+                .id("1")
                 .title("Task 1")
                 .description("Description 1")
                 .status(TaskStatus.TODO)
@@ -42,7 +42,7 @@ class TaskMapperImplTest {
                 .build();
 
         Task task2 = Task.builder()
-                .id(2L)
+                .id("2")
                 .title("Task 2")
                 .description("Description 2")
                 .status(TaskStatus.IN_PROGRESS)
@@ -61,7 +61,7 @@ class TaskMapperImplTest {
         assertThat(result).hasSize(2);
 
         TaskResponse response1 = result.get(0);
-        assertThat(response1.id()).isEqualTo(1L);
+        assertThat(response1.id()).isEqualTo("1");
         assertThat(response1.title()).isEqualTo("Task 1");
         assertThat(response1.description()).isEqualTo("Description 1");
         assertThat(response1.status()).isEqualTo(TaskStatus.TODO);
@@ -69,7 +69,7 @@ class TaskMapperImplTest {
         assertThat(response1.dueDate()).isEqualTo(now.plusDays(7));
 
         TaskResponse response2 = result.get(1);
-        assertThat(response2.id()).isEqualTo(2L);
+        assertThat(response2.id()).isEqualTo("2");
         assertThat(response2.title()).isEqualTo("Task 2");
         assertThat(response2.status()).isEqualTo(TaskStatus.IN_PROGRESS);
         assertThat(response2.priority()).isEqualTo(TaskPriority.HIGH);
@@ -100,7 +100,7 @@ class TaskMapperImplTest {
     void map_WithNullOptionalFields_ShouldMapCorrectly() {
         // Arrange
         Task task = Task.builder()
-                .id(1L)
+                .id("1")
                 .title("Minimal Task")
                 .description(null)
                 .status(TaskStatus.TODO)

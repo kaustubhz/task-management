@@ -1,9 +1,7 @@
 package com.management.tasks.config;
 
-import com.management.tasks.entity.Role;
 import com.management.tasks.entity.RoleName;
 import com.management.tasks.entity.User;
-import com.management.tasks.repository.RoleRepository;
 import com.management.tasks.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +16,6 @@ import java.util.Set;
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
 
-    private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -26,39 +23,26 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("Initializing default roles and users...");
 
-        // Create roles if they don't exist
-        Role userRole = createRoleIfNotExists(RoleName.ROLE_USER);
-        Role managerRole = createRoleIfNotExists(RoleName.ROLE_MANAGER);
-        Role adminRole = createRoleIfNotExists(RoleName.ROLE_ADMIN);
 
         // Create default users if they don't exist
-        createUserIfNotExists("user", "user@example.com", "password123", Set.of(userRole));
-        createUserIfNotExists("manager", "manager@example.com", "password123", Set.of(userRole, managerRole));
-        createUserIfNotExists("admin", "admin@example.com", "password123", Set.of(userRole, managerRole, adminRole));
+        createUserIfNotExists("user", "user@example.com", "password123", Set.of(RoleName.ROLE_USER.name()));
+        createUserIfNotExists("manager", "manager@example.com", "password123",
+                Set.of(RoleName.ROLE_USER.name(), RoleName.ROLE_MANAGER.name()));
+        createUserIfNotExists("admin", "admin@example.com", "password123",
+                Set.of(RoleName.ROLE_USER.name(), RoleName.ROLE_MANAGER.name(), RoleName.ROLE_ADMIN.name()));
 
         log.info("Data initialization completed.");
     }
 
-    private Role createRoleIfNotExists(RoleName roleName) {
-        return roleRepository.findByName(roleName)
-                .orElseGet(() -> {
-                    Role role = Role.builder()
-                            .name(roleName)
-                            .build();
-                    Role savedRole = roleRepository.save(role);
-                    log.info("Created role: {}", roleName);
-                    return savedRole;
-                });
-    }
 
-    private void createUserIfNotExists(String username, String email, String password, Set<Role> roles) {
+    private void createUserIfNotExists(String username, String email, String password, Set<String> roles) {
         if (!userRepository.existsByUsername(username)) {
             User user = User.builder()
                     .username(username)
                     .email(email)
                     .password(passwordEncoder.encode(password))
-                    .enabled(true)
                     .roles(roles)
+                    .enabled(true)
                     .build();
             userRepository.save(user);
             log.info("Created user: {} with email: {}", username, email);

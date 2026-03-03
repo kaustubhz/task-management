@@ -1,5 +1,6 @@
 package com.management.tasks.security;
 
+import com.management.tasks.entity.RoleName;
 import com.management.tasks.entity.User;
 import com.management.tasks.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         Set<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+                .map(role -> new SimpleGrantedAuthority(RoleName.valueOf(role).name()))
                 .collect(Collectors.toSet());
 
         return org.springframework.security.core.userdetails.User.builder()

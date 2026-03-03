@@ -36,7 +36,7 @@ public class TaskServiceBusinessLogic {
 	}
 
 	public TaskResponse getTaskById(String id) {
-		var task = taskRepository.findById(Long.parseLong(id))
+		var task = taskRepository.findById(id)
 				.orElseThrow(() -> new TaskNotFoundException(id));
 		return new TaskResponse(
 				task.getId(),
@@ -51,7 +51,7 @@ public class TaskServiceBusinessLogic {
 
 	public Task updateTask(String id, TaskUpdateRequest taskUpdateRequest) {
 		var task = Task.builder()
-				.id(Long.parseLong(id))
+				.id(id)
 				.title(taskUpdateRequest.title())
 				.description(taskUpdateRequest.description())
 				.status(taskUpdateRequest.status())
@@ -63,7 +63,7 @@ public class TaskServiceBusinessLogic {
 
 	public void deleteTask(String taskId) {
 
-		taskRepository.deleteById(Long.valueOf(taskId));
+		taskRepository.deleteById(taskId);
 
 	}
 }
