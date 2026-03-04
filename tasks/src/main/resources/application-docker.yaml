@@ -1,0 +1,16 @@
+# Docker profile — overrides for running inside docker-compose network
+# Service names (mongodb, keycloak) are used instead of localhost
+
+spring:
+  docker:
+    compose:
+      enabled: false
+  mongodb:
+    uri: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-password}@mongodb:27017/${MONGO_DATABASE:-taskdb}?authSource=admin
+
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://keycloak:8180/realms/task-management
