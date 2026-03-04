@@ -1,9 +1,6 @@
 package com.management.tasks.security;
 
-import com.management.tasks.entity.Role;
-import com.management.tasks.entity.RoleName;
 import com.management.tasks.entity.User;
-import com.management.tasks.repository.RoleRepository;
 import com.management.tasks.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +8,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -30,7 +26,11 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CustomOAuth2UserService Unit Tests")
@@ -38,9 +38,6 @@ class CustomOAuth2UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private RoleRepository roleRepository;
 
     // We can't easily mock super.loadUser() from DefaultOAuth2UserService,
     // so we'll test the processOAuth2User logic through a subclass wrapper or
@@ -65,17 +62,12 @@ class CustomOAuth2UserServiceTest {
 
     private TestableCustomOAuth2UserService testableService;
 
-    private Role userRole;
     private ClientRegistration keycloakRegistration;
     private OAuth2AccessToken accessToken;
 
     @BeforeEach
     void setUp() {
-        testableService = new TestableCustomOAuth2UserService(userRepository, roleRepository);
-
-        userRole = new Role();
-        userRole.setId(1L);
-        userRole.setName(RoleName.ROLE_USER);
+        testableService = new TestableCustomOAuth2UserService(userRepository);
 
         keycloakRegistration = ClientRegistration
                 .withRegistrationId("keycloak")
@@ -130,16 +122,15 @@ class CustomOAuth2UserServiceTest {
             testableService.setMockedSuperUser(mockOAuth2);
 
             when(userRepository.findByEmail("oauth@example.com")).thenReturn(Optional.empty());
-            when(roleRepository.findByName(RoleName.ROLE_USER)).thenReturn(Optional.of(userRole));
 
             User savedUser = User.builder()
-                    .id(10L)
+                    .id("user-id-10")
                     .username("oauth-user")
                     .email("oauth@example.com")
                     .provider("keycloak")
                     .providerId("keycloak-sub-123")
                     .enabled(true)
-                    .roles(Set.of(userRole))
+                    .roles(Set.of("ROLE_USER"))
                     .build();
 
             when(userRepository.save(any(User.class))).thenReturn(savedUser);
@@ -178,13 +169,13 @@ class CustomOAuth2UserServiceTest {
             testableService.setMockedSuperUser(mockOAuth2);
 
             User existingUser = User.builder()
-                    .id(5L)
+                    .id("user-id-5")
                     .username("existing_local")
                     .email("existing@example.com")
                     .password("hashed_pass")
                     .provider(null)
                     .providerId(null)
-                    .roles(Set.of(userRole))
+                    .roles(Set.of("ROLE_USER"))
                     .build();
 
             when(userRepository.findByEmail("existing@example.com")).thenReturn(Optional.of(existingUser));
@@ -236,8 +227,8 @@ class CustomOAuth2UserServiceTest {
     private static class TestableCustomOAuth2UserService extends CustomOAuth2UserService {
         private OAuth2User mockedSuperUser;
 
-        public TestableCustomOAuth2UserService(UserRepository userRepository, RoleRepository roleRepository) {
-            super(userRepository, roleRepository);
+        public TestableCustomOAuth2UserService(UserRepository userRepository) {
+            super(userRepository);
         }
 
         public void setMockedSuperUser(OAuth2User user) {

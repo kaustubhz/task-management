@@ -2,6 +2,12 @@ spring:
   application:
     name: tasks
 
+  # MongoDB Configuration (Local Docker)
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://admin:password@localhost:27017/taskdb?authSource=admin}
+      database: taskdb
+
   # H2 Database Configuration
   datasource:
     url: jdbc:h2:mem:taskdb

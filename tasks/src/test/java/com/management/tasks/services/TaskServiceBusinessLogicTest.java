@@ -26,7 +26,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +54,7 @@ class TaskServiceBusinessLogicTest {
         now = LocalDateTime.now();
 
         sampleTask = Task.builder()
-                .id(1L)
+                .id("1")
                 .title("Test Task")
                 .description("Test Description")
                 .status(TaskStatus.TODO)
@@ -79,7 +79,7 @@ class TaskServiceBusinessLogicTest {
                 now.plusDays(14));
 
         sampleTaskResponse = new TaskResponse(
-                1L,
+                "1",
                 "Test Task",
                 "Test Description",
                 TaskStatus.TODO,
@@ -104,7 +104,7 @@ class TaskServiceBusinessLogicTest {
 
             // Assert
             assertThat(result).isNotNull();
-            assertThat(result.getId()).isEqualTo(1L);
+            assertThat(result.getId()).isEqualTo("1");
             assertThat(result.getTitle()).isEqualTo("Test Task");
             assertThat(result.getDescription()).isEqualTo("Test Description");
             assertThat(result.getStatus()).isEqualTo(TaskStatus.TODO);
@@ -133,7 +133,7 @@ class TaskServiceBusinessLogicTest {
 
             // Assert
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).id()).isEqualTo(1L);
+            assertThat(result.get(0).id()).isEqualTo("1");
             assertThat(result.get(0).title()).isEqualTo("Test Task");
 
             verify(taskRepository).findAll();
@@ -166,32 +166,32 @@ class TaskServiceBusinessLogicTest {
         @DisplayName("should return task response when task exists")
         void getTaskById_WhenExists_ShouldReturnTaskResponse() {
             // Arrange
-            when(taskRepository.findById(1L)).thenReturn(Optional.of(sampleTask));
+            when(taskRepository.findById("1")).thenReturn(Optional.of(sampleTask));
 
             // Act
             TaskResponse result = taskService.getTaskById("1");
 
             // Assert
             assertThat(result).isNotNull();
-            assertThat(result.id()).isEqualTo(1L);
+            assertThat(result.id()).isEqualTo("1");
             assertThat(result.title()).isEqualTo("Test Task");
             assertThat(result.status()).isEqualTo(TaskStatus.TODO);
 
-            verify(taskRepository).findById(1L);
+            verify(taskRepository).findById("1");
         }
 
         @Test
         @DisplayName("should throw exception when task not found")
         void getTaskById_WhenNotExists_ShouldThrowException() {
             // Arrange
-            when(taskRepository.findById(anyLong())).thenReturn(Optional.empty());
+            when(taskRepository.findById(anyString())).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThatThrownBy(() -> taskService.getTaskById("999"))
                     .isInstanceOf(TaskNotFoundException.class)
                     .hasMessageContaining("Task is not found 999");
 
-            verify(taskRepository).findById(999L);
+            verify(taskRepository).findById("999");
         }
     }
 
@@ -204,7 +204,7 @@ class TaskServiceBusinessLogicTest {
         void updateTask_ShouldSaveAndReturnUpdatedTask() {
             // Arrange
             Task updatedTask = Task.builder()
-                    .id(1L)
+                    .id("1")
                     .title("Updated Task")
                     .description("Updated Description")
                     .status(TaskStatus.IN_PROGRESS)
@@ -238,7 +238,7 @@ class TaskServiceBusinessLogicTest {
             taskService.deleteTask("1");
 
             // Assert
-            verify(taskRepository).deleteById(1L);
+            verify(taskRepository).deleteById("1");
         }
     }
 }

@@ -47,3 +47,6 @@ build/
 ### Generated Files ###
 *.log
 *.cache
+
+### Environment Secrets ###
+.env
