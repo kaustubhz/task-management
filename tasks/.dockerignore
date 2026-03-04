@@ -1,0 +1,14 @@
+target/
+.git/
+.gitignore
+.env
+*.md
+.idea/
+*.iml
+.vscode/
+.gemini/
+docker-compose*.yml
+compose*.yaml
+Dockerfile
+.dockerignore
+docs/
