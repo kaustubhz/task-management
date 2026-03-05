@@ -49,9 +49,12 @@ public class SecurityConfig {
                                 // Configure authorization
                                 .authorizeHttpRequests(auth -> auth
                                                 // Public endpoints
-                                                .requestMatchers("/h2-console/**").permitAll()
                                                 .requestMatchers("/actuator/health").permitAll()
                                                 .requestMatchers("/", "/login", "/oauth2/**").permitAll()
+                                                // Swagger / OpenAPI
+                                                .requestMatchers("/swagger-ui/**", "/swagger-ui.html",
+                                                                "/v3/api-docs/**")
+                                                .permitAll()
 
                                                 // All other endpoints require authentication
                                                 .anyRequest().authenticated())
