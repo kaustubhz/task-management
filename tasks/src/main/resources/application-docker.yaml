@@ -1,6 +1,9 @@
 # Docker profile — overrides for running inside docker-compose network
 # Service names (mongodb, keycloak) are used instead of localhost
 
+server:
+  port: 8080
+
 spring:
   docker:
     compose:
