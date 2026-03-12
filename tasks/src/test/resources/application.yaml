@@ -1,4 +1,6 @@
 spring:
+  cache:
+    type: none
   security:
     oauth2:
       client:
@@ -12,6 +14,14 @@ spring:
         provider:
           keycloak:
             issuer-uri: http://localhost:8180/realms/task-management
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/testdb
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 6.0.6
 app:
   security:
     enabled: false

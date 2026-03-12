@@ -12,6 +12,8 @@ import com.management.tasks.repository.ITaskRepositoryForAllTasks;
 import com.management.tasks.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +47,7 @@ public class TaskServiceBusinessLogic {
 		return taskMapper.map(tasks);
 	}
 
+	@Cacheable(value = "tasks", key = "#id")
 	public TaskResponse getTaskById(String id) {
 		var task = taskRepository.findById(id)
 				.orElseThrow(() -> new TaskNotFoundException(id));
@@ -59,6 +62,7 @@ public class TaskServiceBusinessLogic {
 				task.getUpdatedAt());
 	}
 
+	@CacheEvict(value = "tasks", key = "#id")
 	public Task updateTask(String id, TaskUpdateRequest taskUpdateRequest) {
 		var task = Task.builder()
 				.id(id)
@@ -71,6 +75,7 @@ public class TaskServiceBusinessLogic {
 		return taskRepository.save(task);
 	}
 
+	@CacheEvict(value = "tasks", key = "#taskId")
 	public void deleteTask(String taskId) {
 
 		taskRepository.deleteById(taskId);
@@ -78,12 +83,13 @@ public class TaskServiceBusinessLogic {
 	}
 
 	public Page<TaskResponse> findAllTasksByFilters(TaskStatus taskStatus, TaskPriority taskPriority,
-											int page, int size, String direction, String createdAt) {
+			int page, int size, String direction, String createdAt) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromOptionalString(direction).isEmpty()
-						? Sort.DEFAULT_DIRECTION : Sort.Direction.fromOptionalString(direction).get(),
+				? Sort.DEFAULT_DIRECTION
+				: Sort.Direction.fromOptionalString(direction).get(),
 				createdAt));
 		var tasks = taskRepositoryForAllTasks.findTasksUsingFilters(taskStatus, taskPriority, pageable);
-		var taskResponse = tasks.map(task ->  new TaskResponse(
+		var taskResponse = tasks.map(task -> new TaskResponse(
 				task.getId(),
 				task.getTitle(),
 				task.getDescription(),
@@ -91,8 +97,7 @@ public class TaskServiceBusinessLogic {
 				task.getPriority(),
 				task.getDueDate(),
 				task.getCreatedAt(),
-				task.getUpdatedAt()
-		));
+				task.getUpdatedAt()));
 		log.debug("Tasks are {}", taskResponse);
 		return taskResponse;
 	}

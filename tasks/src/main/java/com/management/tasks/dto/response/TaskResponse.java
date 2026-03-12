@@ -4,6 +4,7 @@ import com.management.tasks.entity.TaskPriority;
 import com.management.tasks.entity.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Schema(description = "Task response returned by the API")
@@ -22,5 +23,6 @@ public record TaskResponse(
 
 		@Schema(description = "When the task was created") LocalDateTime createdAt,
 
-		@Schema(description = "When the task was last updated") LocalDateTime updatedAt) {
+		@Schema(description = "When the task was last updated") LocalDateTime updatedAt)
+		implements Serializable {
 }

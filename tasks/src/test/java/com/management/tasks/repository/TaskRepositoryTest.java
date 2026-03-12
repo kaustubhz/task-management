@@ -21,7 +21,17 @@ import org.springframework.context.annotation.Import;
 import com.management.tasks.config.TestSecurityConfig;
 
 @SpringBootTest(properties = {
-        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration,org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration,org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration"
+        "spring.autoconfigure.exclude=" +
+                "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration," +
+                "org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration," +
+                "org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration,"
+                +
+                "org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration," +
+                "org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration," +
+                "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration," +
+                "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration," +
+                "org.springframework.boot.docker.compose.core.DockerComposeAutoConfiguration," +
+                "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
 })
 @org.springframework.test.context.ActiveProfiles("test")
 @Import(TestSecurityConfig.class)
@@ -39,6 +49,7 @@ class TaskRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        taskRepository.deleteAll();
         now = LocalDateTime.now();
 
         sampleTask = Task.builder()
@@ -58,16 +69,17 @@ class TaskRepositoryTest {
         @DisplayName("should persist task and generate ID")
         void save_ShouldPersistTask() {
             // Act
-            Task savedTask = taskRepository.save(sampleTask);
+            Task saved = taskRepository.save(sampleTask);
 
             // Assert
-            assertThat(savedTask.getId()).isNotNull();
-            assertThat(savedTask.getTitle()).isEqualTo("Test Task");
-            assertThat(savedTask.getDescription()).isEqualTo("Test Description");
-            assertThat(savedTask.getStatus()).isEqualTo(TaskStatus.TODO);
-            assertThat(savedTask.getPriority()).isEqualTo(TaskPriority.MEDIUM);
-            assertThat(savedTask.getCreatedAt()).isNotNull();
-            assertThat(savedTask.getUpdatedAt()).isNotNull();
+            assertThat(saved).isNotNull();
+            assertThat(saved.getId()).isNotNull();
+            assertThat(saved.getTitle()).isEqualTo("Test Task");
+            assertThat(saved.getDescription()).isEqualTo("Test Description");
+            assertThat(saved.getStatus()).isEqualTo(TaskStatus.TODO);
+            assertThat(saved.getPriority()).isEqualTo(TaskPriority.MEDIUM);
+            assertThat(saved.getCreatedAt()).isNotNull();
+            assertThat(saved.getUpdatedAt()).isNotNull();
         }
 
         @Test
@@ -202,7 +214,6 @@ class TaskRepositoryTest {
             // Act
             persistedTask.setTitle("Updated Title");
             persistedTask.setStatus(TaskStatus.COMPLETED);
-            Task updatedTask = taskRepository.save(persistedTask);
 
             // Assert
             Task foundTask = mongoTemplate.findById(persistedTask.getId(), Task.class);

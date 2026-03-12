@@ -49,6 +49,9 @@ public class TaskController {
 	@PostMapping(consumes = "application/json")
 	public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest taskRequest) {
 		var createdTask = taskServiceBusinessLogic.createTask(taskRequest);
+		if (createdTask == null) {
+			throw new RuntimeException("Failed to create task");
+		}
 		var response = new TaskResponse(
 				createdTask.getId(),
 				createdTask.getTitle(),

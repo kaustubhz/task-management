@@ -14,9 +14,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -38,7 +40,20 @@ import org.springframework.context.annotation.Import;
 import com.management.tasks.config.TestSecurityConfig;
 
 @WebMvcTest(controllers = TaskController.class, properties = {
-                "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration,org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration,org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration"
+                "spring.autoconfigure.exclude=" +
+                                "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration," +
+                                "org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration,"
+                                +
+                                "org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration,"
+                                +
+                                "org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration,"
+                                +
+                                "org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration,"
+                                +
+                                "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration," +
+                                "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration,"
+                                +
+                                "org.springframework.boot.docker.compose.core.DockerComposeAutoConfiguration"
 })
 @org.springframework.test.context.ActiveProfiles("test")
 @Import(TestSecurityConfig.class)
@@ -49,13 +64,13 @@ class TaskControllerTest {
         @Autowired
         private MockMvc mockMvc;
 
-        @MockitoBean
+        @MockBean
         private TaskServiceBusinessLogic taskServiceBusinessLogic;
 
-        @MockitoBean
+        @MockBean
         private CustomOAuth2UserService customOAuth2UserService;
 
-        @MockitoBean
+        @MockBean
         private ClientRegistrationRepository clientRegistrationRepository;
 
         private ObjectMapper objectMapper;
@@ -139,6 +154,10 @@ class TaskControllerTest {
                                         TaskStatus.TODO,
                                         TaskPriority.MEDIUM,
                                         now.plusDays(7));
+                        // In unit test mode, @Valid is triggered by MockMvc.
+                        // If it bypasses validation (which shouldn't happen with @Valid),
+                        // we mock it to return null to test our controller's safety check.
+                        when(taskServiceBusinessLogic.createTask(any(TaskRequest.class))).thenReturn(null);
 
                         // Act & Assert
                         mockMvc.perform(post("/api/tasks")
@@ -157,6 +176,7 @@ class TaskControllerTest {
                                         null,
                                         TaskPriority.MEDIUM,
                                         now.plusDays(7));
+                        when(taskServiceBusinessLogic.createTask(any(TaskRequest.class))).thenReturn(null);
 
                         // Act & Assert
                         mockMvc.perform(post("/api/tasks")
@@ -174,27 +194,35 @@ class TaskControllerTest {
                 @DisplayName("should return 200 OK with list of tasks")
                 void getTasks_ShouldReturn200WithList() throws Exception {
                         // Arrange
-                        when(taskServiceBusinessLogic.fetchTasks()).thenReturn(List.of(sampleTaskResponse));
+                        org.springframework.data.domain.Page<TaskResponse> page = new org.springframework.data.domain.PageImpl<>(
+                                        List.of(sampleTaskResponse));
+                        when(taskServiceBusinessLogic.findAllTasksByFilters(any(), any(), anyInt(), anyInt(),
+                                        anyString(), anyString()))
+                                        .thenReturn(page);
 
                         // Act & Assert
                         mockMvc.perform(get("/api/tasks"))
                                         .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$").isArray())
-                                        .andExpect(jsonPath("$[0].id").value("1"))
-                                        .andExpect(jsonPath("$[0].title").value("Test Task"));
+                                        .andExpect(jsonPath("$.content").isArray())
+                                        .andExpect(jsonPath("$.content[0].id").value("1"))
+                                        .andExpect(jsonPath("$.content[0].title").value("Test Task"));
                 }
 
                 @Test
                 @DisplayName("should return 200 OK with empty list when no tasks")
                 void getTasks_WhenEmpty_ShouldReturn200WithEmptyList() throws Exception {
                         // Arrange
-                        when(taskServiceBusinessLogic.fetchTasks()).thenReturn(Collections.emptyList());
+                        org.springframework.data.domain.Page<TaskResponse> emptyPage = new org.springframework.data.domain.PageImpl<>(
+                                        Collections.emptyList());
+                        when(taskServiceBusinessLogic.findAllTasksByFilters(any(), any(), anyInt(), anyInt(),
+                                        anyString(), anyString()))
+                                        .thenReturn(emptyPage);
 
                         // Act & Assert
                         mockMvc.perform(get("/api/tasks"))
                                         .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$").isArray())
-                                        .andExpect(jsonPath("$").isEmpty());
+                                        .andExpect(jsonPath("$.content").isArray())
+                                        .andExpect(jsonPath("$.content").isEmpty());
                 }
         }
 

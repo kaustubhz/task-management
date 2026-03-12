@@ -11,6 +11,11 @@ spring:
   mongodb:
     uri: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-password}@mongodb:27017/${MONGO_DATABASE:-taskdb}?authSource=admin
 
+  data:
+    redis:
+      host: redis
+      port: 6379
+
   security:
     oauth2:
       client:
