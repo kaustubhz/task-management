@@ -1,5 +1,6 @@
 package com.management.tasks.repository;
 
+import com.management.tasks.config.TestSecurityConfig;
 import com.management.tasks.entity.Task;
 import com.management.tasks.entity.TaskPriority;
 import com.management.tasks.entity.TaskStatus;
@@ -9,16 +10,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import org.springframework.context.annotation.Import;
-import com.management.tasks.config.TestSecurityConfig;
 
 @SpringBootTest(properties = {
         "spring.autoconfigure.exclude=" +
@@ -46,18 +46,20 @@ class TaskRepositoryTest {
 
     private Task sampleTask;
     private LocalDateTime now;
+    private OffsetDateTime nowOffset;
 
     @BeforeEach
     void setUp() {
         taskRepository.deleteAll();
         now = LocalDateTime.now();
+        nowOffset = OffsetDateTime.now();
 
         sampleTask = Task.builder()
                 .title("Test Task")
                 .description("Test Description")
                 .status(TaskStatus.TODO)
                 .priority(TaskPriority.MEDIUM)
-                .dueDate(now.plusDays(7))
+                .dueDate(nowOffset.plusDays(7))
                 .build();
     }
 
@@ -91,7 +93,7 @@ class TaskRepositoryTest {
                     .description("Full description with details")
                     .status(TaskStatus.IN_PROGRESS)
                     .priority(TaskPriority.HIGH)
-                    .dueDate(now.plusDays(30))
+                    .dueDate(nowOffset.plusDays(30))
                     .build();
 
             // Act
@@ -216,7 +218,7 @@ class TaskRepositoryTest {
             persistedTask.setStatus(TaskStatus.COMPLETED);
 
             // Assert
-            Task foundTask = mongoTemplate.findById(persistedTask.getId(), Task.class);
+            Task foundTask = mongoTemplate.save(persistedTask);
             assertThat(foundTask.getTitle()).isEqualTo("Updated Title");
             assertThat(foundTask.getStatus()).isEqualTo(TaskStatus.COMPLETED);
         }

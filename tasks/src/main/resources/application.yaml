@@ -30,6 +30,13 @@ spring:
           keycloak:
             issuer-uri: "${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/task-management}"
             user-name-attribute: preferred_username
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: gemma3:latest # Ensure you have run: ollama pull llama3.2
+          temperature: 0.2 # Lower temperature means less creative, more predictable output
 
 # Server Configuration
 server:
@@ -52,3 +59,7 @@ management:
   endpoint:
     health:
       show-details: always
+
+# Gen AI Feature Toggles
+features:
+  ai-enabled: true # Set to true locally when running Ollama

@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -79,6 +80,7 @@ class TaskControllerTest {
         private TaskUpdateRequest sampleTaskUpdateRequest;
         private TaskResponse sampleTaskResponse;
         private LocalDateTime now;
+        private OffsetDateTime nowOffset;
 
         @BeforeEach
         void setUp() {
@@ -86,6 +88,7 @@ class TaskControllerTest {
                 objectMapper.registerModule(new JavaTimeModule());
 
                 now = LocalDateTime.now();
+                nowOffset = OffsetDateTime.now();
 
                 sampleTask = Task.builder()
                                 .id("1")
@@ -93,7 +96,7 @@ class TaskControllerTest {
                                 .description("Test Description")
                                 .status(TaskStatus.TODO)
                                 .priority(TaskPriority.MEDIUM)
-                                .dueDate(now.plusDays(7))
+                                .dueDate(nowOffset.plusDays(7))
                                 .createdAt(now)
                                 .updatedAt(now)
                                 .build();
@@ -103,14 +106,14 @@ class TaskControllerTest {
                                 "Test Description",
                                 TaskStatus.TODO,
                                 TaskPriority.MEDIUM,
-                                now.plusDays(7));
+                                nowOffset.plusDays(7));
 
                 sampleTaskUpdateRequest = new TaskUpdateRequest(
                                 "Updated Task",
                                 "Updated Description",
                                 TaskStatus.IN_PROGRESS,
                                 TaskPriority.HIGH,
-                                now.plusDays(14));
+                                nowOffset.plusDays(14));
 
                 sampleTaskResponse = new TaskResponse(
                                 "1",
@@ -118,7 +121,7 @@ class TaskControllerTest {
                                 "Test Description",
                                 TaskStatus.TODO,
                                 TaskPriority.MEDIUM,
-                                now.plusDays(7),
+                                nowOffset.plusDays(7),
                                 now,
                                 now);
         }
@@ -148,12 +151,12 @@ class TaskControllerTest {
                 @DisplayName("should return 400 Bad Request when title is blank")
                 void createTask_WithBlankTitle_ShouldReturn400() throws Exception {
                         // Arrange
-                        TaskRequest invalidRequest = new TaskRequest(
-                                        "",
-                                        "Description",
-                                        TaskStatus.TODO,
-                                        TaskPriority.MEDIUM,
-                                        now.plusDays(7));
+					TaskRequest invalidRequest = new TaskRequest(
+							"",
+							"Description",
+							TaskStatus.TODO,
+							TaskPriority.MEDIUM,
+							nowOffset.plusDays(7));
                         // In unit test mode, @Valid is triggered by MockMvc.
                         // If it bypasses validation (which shouldn't happen with @Valid),
                         // we mock it to return null to test our controller's safety check.
@@ -170,12 +173,12 @@ class TaskControllerTest {
                 @DisplayName("should return 400 Bad Request when status is null")
                 void createTask_WithNullStatus_ShouldReturn400() throws Exception {
                         // Arrange
-                        TaskRequest invalidRequest = new TaskRequest(
-                                        "Valid Title",
-                                        "Description",
-                                        null,
-                                        TaskPriority.MEDIUM,
-                                        now.plusDays(7));
+					TaskRequest invalidRequest = new TaskRequest(
+							"Valid Title",
+							"Description",
+							null,
+							TaskPriority.MEDIUM,
+							nowOffset.plusDays(7));
                         when(taskServiceBusinessLogic.createTask(any(TaskRequest.class))).thenReturn(null);
 
                         // Act & Assert
@@ -188,6 +191,7 @@ class TaskControllerTest {
 
         @Nested
         @DisplayName("GET /api/tasks")
+        @WithMockUser(roles = "MANAGER")
         class GetTasksTests {
 
                 @Test
@@ -269,10 +273,10 @@ class TaskControllerTest {
                                         .id("1")
                                         .title("Updated Task")
                                         .description("Updated Description")
-                                        .status(TaskStatus.IN_PROGRESS)
-                                        .priority(TaskPriority.HIGH)
-                                        .dueDate(now.plusDays(14))
-                                        .createdAt(now)
+                                         .status(TaskStatus.IN_PROGRESS)
+                                         .priority(TaskPriority.HIGH)
+                                         .dueDate(nowOffset.plusDays(14))
+                                         .createdAt(now)
                                         .updatedAt(now)
                                         .build();
 

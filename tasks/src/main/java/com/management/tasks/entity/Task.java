@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.time.OffsetDateTime;
 
 import java.time.LocalDateTime;
 
@@ -34,7 +35,7 @@ public class Task {
 	@Indexed(unique = true)
 	private TaskPriority priority;
 
-	private LocalDateTime dueDate;
+	private OffsetDateTime dueDate;
 
 	@CreatedDate
 	@Indexed(unique = true)

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Schema(description = "Task response returned by the API")
 public record TaskResponse(
@@ -19,7 +20,7 @@ public record TaskResponse(
 
 		@Schema(description = "Priority level", example = "HIGH") TaskPriority priority,
 
-		@Schema(description = "Due date for the task") LocalDateTime dueDate,
+		@Schema(description = "Due date for the task") OffsetDateTime dueDate,
 
 		@Schema(description = "When the task was created") LocalDateTime createdAt,
 

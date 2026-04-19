@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,11 +20,13 @@ class TaskMapperImplTest {
 
     private TaskMapperImpl taskMapper;
     private LocalDateTime now;
+    private OffsetDateTime nowOffset;
 
     @BeforeEach
     void setUp() {
         taskMapper = new TaskMapperImpl();
         now = LocalDateTime.now();
+        nowOffset = OffsetDateTime.now();
     }
 
     @Test
@@ -36,7 +39,7 @@ class TaskMapperImplTest {
                 .description("Description 1")
                 .status(TaskStatus.TODO)
                 .priority(TaskPriority.LOW)
-                .dueDate(now.plusDays(7))
+                .dueDate(nowOffset.plusDays(7))
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
@@ -47,7 +50,7 @@ class TaskMapperImplTest {
                 .description("Description 2")
                 .status(TaskStatus.IN_PROGRESS)
                 .priority(TaskPriority.HIGH)
-                .dueDate(now.plusDays(14))
+                .dueDate(nowOffset.plusDays(14))
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
@@ -66,7 +69,7 @@ class TaskMapperImplTest {
         assertThat(response1.description()).isEqualTo("Description 1");
         assertThat(response1.status()).isEqualTo(TaskStatus.TODO);
         assertThat(response1.priority()).isEqualTo(TaskPriority.LOW);
-        assertThat(response1.dueDate()).isEqualTo(now.plusDays(7));
+        assertThat(response1.dueDate()).isEqualTo(nowOffset.plusDays(7));
 
         TaskResponse response2 = result.get(1);
         assertThat(response2.id()).isEqualTo("2");

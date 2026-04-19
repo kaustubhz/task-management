@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -48,10 +49,12 @@ class TaskServiceBusinessLogicTest {
     private TaskUpdateRequest sampleTaskUpdateRequest;
     private TaskResponse sampleTaskResponse;
     private LocalDateTime now;
+    private OffsetDateTime nowOffset;
 
     @BeforeEach
     void setUp() {
         now = LocalDateTime.now();
+        nowOffset = OffsetDateTime.now();
 
         sampleTask = Task.builder()
                 .id("1")
@@ -59,7 +62,7 @@ class TaskServiceBusinessLogicTest {
                 .description("Test Description")
                 .status(TaskStatus.TODO)
                 .priority(TaskPriority.MEDIUM)
-                .dueDate(now.plusDays(7))
+                .dueDate(nowOffset.plusDays(7))
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
@@ -69,14 +72,14 @@ class TaskServiceBusinessLogicTest {
                 "Test Description",
                 TaskStatus.TODO,
                 TaskPriority.MEDIUM,
-                now.plusDays(7));
+                nowOffset.plusDays(7));
 
         sampleTaskUpdateRequest = new TaskUpdateRequest(
                 "Updated Task",
                 "Updated Description",
                 TaskStatus.IN_PROGRESS,
                 TaskPriority.HIGH,
-                now.plusDays(14));
+                nowOffset.plusDays(14));
 
         sampleTaskResponse = new TaskResponse(
                 "1",
@@ -84,7 +87,7 @@ class TaskServiceBusinessLogicTest {
                 "Test Description",
                 TaskStatus.TODO,
                 TaskPriority.MEDIUM,
-                now.plusDays(7),
+                nowOffset.plusDays(7),
                 now,
                 now);
     }
@@ -209,7 +212,7 @@ class TaskServiceBusinessLogicTest {
                     .description("Updated Description")
                     .status(TaskStatus.IN_PROGRESS)
                     .priority(TaskPriority.HIGH)
-                    .dueDate(now.plusDays(14))
+                    .dueDate(nowOffset.plusDays(14))
                     .build();
 
             when(taskRepository.save(any(Task.class))).thenReturn(updatedTask);

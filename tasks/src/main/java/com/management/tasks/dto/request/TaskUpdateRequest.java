@@ -4,7 +4,7 @@ import com.management.tasks.entity.TaskPriority;
 import com.management.tasks.entity.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Schema(description = "Request body for updating an existing task. All fields are optional.")
 public record TaskUpdateRequest(
@@ -16,5 +16,5 @@ public record TaskUpdateRequest(
 
 		@Schema(description = "Updated priority", example = "MEDIUM") TaskPriority priority,
 
-		@Schema(description = "Updated due date", example = "2026-04-01T18:00:00") LocalDateTime dueDate) {
+		@Schema(description = "Updated due date", example = "2026-04-01T18:00:00") OffsetDateTime dueDate) {
 }

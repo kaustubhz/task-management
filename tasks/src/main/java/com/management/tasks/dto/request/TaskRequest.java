@@ -5,8 +5,7 @@ import com.management.tasks.entity.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Schema(description = "Request body for creating a new task")
 public record TaskRequest(
@@ -18,5 +17,5 @@ public record TaskRequest(
 
 		@Schema(description = "Priority level of the task", example = "HIGH") @NotNull(message = "Priority is required") TaskPriority priority,
 
-		@Schema(description = "Due date for the task", example = "2026-03-15T10:00:00") LocalDateTime dueDate) {
+		@Schema(description = "Due date for the task", example = "2026-03-15T10:00:00") OffsetDateTime dueDate) {
 }
