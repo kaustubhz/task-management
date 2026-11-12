@@ -24,3 +24,4 @@ trivy fs . --scanners secret
 
 echo ""
 echo "✅ Security scan completed successfully!"
+
