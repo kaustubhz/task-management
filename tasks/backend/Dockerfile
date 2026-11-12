@@ -14,11 +14,19 @@ RUN mvn clean package -DskipTests -B
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
+# Run as non-root user for security (Trivy DS-0002)
+RUN addgroup --system spring && adduser --system spring --ingroup spring
+USER spring:spring
+
 # Copy the built JAR from Stage 1
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
 
 # Expose port
 EXPOSE 8080
+
+# Container healthcheck (Trivy DS-0026)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD java -version || exit 1
 
 # Run with docker profile
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=docker"]
