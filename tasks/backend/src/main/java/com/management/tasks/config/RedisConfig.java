@@ -21,9 +21,9 @@ public class RedisConfig {
 	public RedisCacheConfiguration cacheConfiguration() {
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JavaTimeModule());
-		// Use NON_FINAL_AND_RECORDS for Jackson 2.17+ to support Java records without using deprecated EVERYTHING
-		objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.EVERYTHING,
-				JsonTypeInfo.As.PROPERTY);
+		// Use NON_FINAL for Jackson 2.x to support polymorphic typing without using deprecated EVERYTHING
+		objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance,
+				ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
 
 		GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 
